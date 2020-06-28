@@ -1,21 +1,13 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { actFetchTrains } from '../../../actions/trainAction';
-import { Table, Divider, Tag } from 'antd';
+import { Table, Divider, Tag, Button, Popover } from 'antd';
 import moment from 'moment';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 
 class TrainManage extends Component {
   componentDidMount() {
     this.props.onFetchData();
-    const now = moment().format('MMMM Do YYYY');
-    console.log(now);
-
-    setTimeout(() => {
-      console.log(this.props.trains[0].ngaytratau);
-      console.log(
-        now === moment(this.props.trains[0].ngaytratau).format('MMMM Do YYYY')
-      );
-    }, 2000);
   }
   render() {
     const trains = this.props.trains;
@@ -42,7 +34,28 @@ class TrainManage extends Component {
         dataIndex: 'gahientai',
         key: 'gahientai',
         render: (text, record) => {
-          return record.gahientai ? record.gahientai : 'Chưa xác định';
+          return moment().isAfter(moment(record.ngaytratau).endOf('day')) ? (
+            <div>
+              <Tag color="green">{record.gahientai}</Tag>
+              <Popover
+                content="Nếu tàu hiện đang ở ga thì sẽ có màu xanh, còn đang chạy thì sẽ là màu đỏ"
+                title="Note!"
+              >
+                <QuestionCircleOutlined />
+              </Popover>
+              ,
+            </div>
+          ) : (
+            <div>
+              <Tag color="red">{record.gahientai}</Tag>
+              <Popover
+                content="Nếu tàu hiện đang ở ga thì sẽ có màu xanh, còn đang chạy thì sẽ là màu đỏ"
+                title="Note!"
+              >
+                <QuestionCircleOutlined />
+              </Popover>
+            </div>
+          );
         },
       },
       {

@@ -11,6 +11,12 @@ const RouteSchema = new Schema({
   mactau: {
     type: String,
   },
+  gia1Km: {
+    type: Number,
+  },
+  trangThai: {
+    type: Number,
+  },
   lytrinh: [],
 });
 const Route = mongoose.model('Route', RouteSchema);

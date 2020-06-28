@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { Form, Input, Button, Spin } from 'antd';
-import { notification } from 'antd';
+
 import { openNotificationWithIcon } from '../../utils/notification';
 import { actLogin } from '../../actions/authAction';
 import { connect } from 'react-redux';
+import './index.css';
 
 const layout = {
   labelCol: { span: 8 },
@@ -63,9 +64,9 @@ class LoginForm extends Component {
 
   render() {
     return (
-      <>
+      <div>
         <Spin spinning={this.state.loading}>
-          <h1 style={{ textAlign: 'center' }}>Đăng nhập</h1>
+          <h2 style={{ textAlign: 'center', color: 'white' }}>Đăng nhập</h2>
           <Form
             {...layout}
             style={{ width: '30%', margin: 'auto' }}
@@ -74,6 +75,7 @@ class LoginForm extends Component {
             validateMessages={validateMessages}
           >
             <Form.Item
+              style={{ color: 'white' }}
               label="Email"
               name="email"
               rules={[
@@ -99,13 +101,21 @@ class LoginForm extends Component {
             </Form.Item>
 
             <Form.Item {...tailLayout}>
-              <Button type="primary" htmlType="submit">
+              <Button
+                style={{
+                  backgroundColor: 'white',
+                  color: 'black',
+                  border: 0.5,
+                  borderRadius: 5,
+                }}
+                htmlType="submit"
+              >
                 Đăng nhập
               </Button>
             </Form.Item>
           </Form>
         </Spin>
-      </>
+      </div>
     );
   }
 }

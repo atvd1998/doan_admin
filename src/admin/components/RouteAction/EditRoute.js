@@ -2,7 +2,18 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { actEditRoute } from '../../../actions/routeAction';
 
-import { Form, Button, Select, Divider, Table, DatePicker } from 'antd';
+import {
+  Form,
+  Button,
+  Select,
+  Divider,
+  Table,
+  DatePicker,
+  Spin,
+  Popover,
+} from 'antd';
+import { DeleteOutlined, PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { openNotificationWithIcon } from '../../../utils/notification';
 
 import moment from 'moment';
 import train from '../../../assets/images/train.png';
@@ -44,6 +55,7 @@ class EditRoute extends Component {
     tongKM: null,
     _id: null,
     mactau: null,
+    loading: false,
   };
   componentDidMount() {
     const routeID = this.props.match.params.id;
@@ -138,6 +150,8 @@ class EditRoute extends Component {
   };
 
   handleClickSubmit = () => {
+    this.setState({ loading: true });
+
     this.props.onEditRoute({
       _id: this.state._id,
       gadi: this.state.gadi,
@@ -146,8 +160,15 @@ class EditRoute extends Component {
       mactau: this.state.mactau,
       tongKM: this.state.tongKM,
     });
-
-    this.props.history.push('/dashboard/routemanage');
+    setTimeout(() => {
+      this.setState({ loading: false });
+      if (this.props.isEdited === false) {
+        openNotificationWithIcon('error', 'Thông báo', this.props.err.msg.msg);
+      } else {
+        openNotificationWithIcon('success', 'Thông báo', this.props.msg);
+        this.props.history.push('/dashboard/routemanage');
+      }
+    }, 3000);
   };
   render() {
     const route = this.state.lytrinh;
@@ -195,9 +216,8 @@ class EditRoute extends Component {
               <Button
                 type="danger"
                 onClick={() => this.handleClickDelete(record.gaDi)}
-              >
-                Xóa
-              </Button>
+                icon={<DeleteOutlined />}
+              ></Button>
             )}
           </>
         ),
@@ -205,144 +225,162 @@ class EditRoute extends Component {
     ];
     return (
       <div>
-        <Divider>Thông tin lịch trình</Divider>
-        <div style={{ textAlign: 'center' }}>
-          <div>
-            {this.state.gadi ? this.state.gadi : null}
-            <img
-              style={{ width: '50px', margin: '0px 30px 0px 30px' }}
-              src={train}
-              alt="train"
-            />
-            {this.state.gaden ? this.state.gaden : null}
+        <Spin spinning={this.state.loading}>
+          <Divider>Thông tin lịch trình</Divider>
+          <div style={{ textAlign: 'center' }}>
+            <div>
+              {this.state.gadi ? this.state.gadi : null}
+              <img
+                style={{ width: '50px', margin: '0px 30px 0px 30px' }}
+                src={train}
+                alt="train"
+              />
+              {this.state.gaden ? this.state.gaden : null}
+            </div>
           </div>
-        </div>
 
-        <Divider>Thông tin chuyến đi</Divider>
-        <Form
-          ref={this.formRef}
-          style={{ width: '30%', margin: 'auto' }}
-          {...layout}
-          name="nest-messages"
-          onFinish={this.handleSubmit}
-          validateMessages={validateMessages}
-        >
-          <Form.Item
-            label="Ga đi"
-            name={['route', 'tenga']}
-            rules={[
-              {
-                required: true,
-              },
-              () => ({
-                validator(rule, value) {
-                  const ga = route.find((r) => r.gaDi === value);
-                  if (!value || !ga) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject('Ga đi không hợp lệ');
+          <Divider>
+            Thông tin chuyến đi{' '}
+            <Popover
+              content={this.props.stations.map((station, index) => (
+                <div key={index}>
+                  {station.tenga} - {station.khoangcach} km
+                </div>
+              ))}
+              title="Thứ tự ga"
+            >
+              <QuestionCircleOutlined />
+            </Popover>
+          </Divider>
+          <Form
+            ref={this.formRef}
+            style={{ width: '30%', margin: 'auto' }}
+            {...layout}
+            name="nest-messages"
+            onFinish={this.handleSubmit}
+            validateMessages={validateMessages}
+          >
+            <Form.Item
+              label="Ga đi"
+              name={['route', 'tenga']}
+              rules={[
+                {
+                  required: true,
                 },
-              }),
-              () => ({
-                validator(rule, value) {
-                  if (route.length > 1) {
-                    let kcGaDen = stations.find(
-                      (station) => station.tenga === value
-                    ).khoangcach;
-                    let kcGaDi = stations.find(
-                      (station) =>
-                        station.tenga === route[route.length - 1].gaDi
-                    ).khoangcach;
-
-                    let kcGaTruoc = stations.find(
-                      (station) =>
-                        station.tenga === route[route.length - 2].gaDi
-                    ).khoangcach;
-
-                    // eslint-disable-next-line no-mixed-operators
-                    if (kcGaDen < kcGaDi === kcGaDi < kcGaTruoc) {
+                () => ({
+                  validator(rule, value) {
+                    const ga = route.find((r) => r.gaDi === value);
+                    if (!value || !ga) {
                       return Promise.resolve();
                     }
-                    return Promise.reject('Vui lòng chọn ga theo đúng thứ tự');
-                  }
+                    return Promise.reject('Ga đi không hợp lệ');
+                  },
+                }),
+                () => ({
+                  validator(rule, value) {
+                    if (route.length > 1) {
+                      let kcGaDen = stations.find(
+                        (station) => station.tenga === value
+                      ).khoangcach;
+                      let kcGaDi = stations.find(
+                        (station) =>
+                          station.tenga === route[route.length - 1].gaDi
+                      ).khoangcach;
 
-                  return Promise.resolve();
-                },
-              }),
-            ]}
-          >
-            <Select>
-              {this.state.stations
-                ? this.state.stations.map((station, index) => {
-                    return (
-                      <Option key={index} value={station.tenga}>
-                        {station.tenga}
-                      </Option>
-                    );
-                  })
-                : 'Load data'}
-            </Select>
-          </Form.Item>
-          <Form.Item
-            label="Ngày đi"
-            name={['route', 'ngaydi']}
-            rules={[
-              {
-                required: true,
-                message: 'Vui lòng nhập thông tin thời gian đi',
-              },
-              () => ({
-                validator(rule, value) {
-                  if (route.length > 0) {
-                    if (value && convertToNumber(value[0]) < date) {
+                      let kcGaTruoc = stations.find(
+                        (station) =>
+                          station.tenga === route[route.length - 2].gaDi
+                      ).khoangcach;
+
+                      // eslint-disable-next-line no-mixed-operators
+                      if (kcGaDen < kcGaDi === kcGaDi < kcGaTruoc) {
+                        return Promise.resolve();
+                      }
                       return Promise.reject(
-                        'Vui lòng chọn thời gian sau thời gian đến'
+                        'Vui lòng chọn ga theo đúng thứ tự'
                       );
                     }
+
                     return Promise.resolve();
-                  } else {
-                    let today = new moment().date();
-                    if (value && value[0].date() === today) {
-                      return Promise.reject('Vui lòng không chọn ngày hôm nay');
-                    }
-                    return Promise.resolve();
-                  }
+                  },
+                }),
+              ]}
+            >
+              <Select>
+                {this.state.stations
+                  ? this.state.stations.map((station, index) => {
+                      return (
+                        <Option key={index} value={station.tenga}>
+                          {station.tenga}
+                        </Option>
+                      );
+                    })
+                  : 'Load data'}
+              </Select>
+            </Form.Item>
+            <Form.Item
+              label="Ngày đi"
+              name={['route', 'ngaydi']}
+              rules={[
+                {
+                  required: true,
+                  message: 'Vui lòng nhập thông tin thời gian đi',
                 },
-              }),
-            ]}
-          >
-            <RangePicker
-              format="MM/DD/YYYY HH:mm"
-              showTime={{ format: 'HH:mm' }}
-              style={{ width: '100%' }}
-              disabledDate={disabledDate}
-            />
-          </Form.Item>
+                () => ({
+                  validator(rule, value) {
+                    if (route.length > 0) {
+                      if (value && convertToNumber(value[0]) < date) {
+                        return Promise.reject(
+                          'Vui lòng chọn thời gian sau thời gian đến'
+                        );
+                      }
+                      return Promise.resolve();
+                    } else {
+                      let today = new moment().date();
+                      if (value && value[0].date() === today) {
+                        return Promise.reject(
+                          'Vui lòng không chọn ngày hôm nay'
+                        );
+                      }
+                      return Promise.resolve();
+                    }
+                  },
+                }),
+              ]}
+            >
+              <RangePicker
+                format="MM/DD/YYYY HH:mm"
+                showTime={{ format: 'HH:mm' }}
+                style={{ width: '100%' }}
+                disabledDate={disabledDate}
+              />
+            </Form.Item>
 
-          <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
-            <Button type="primary" htmlType="submit">
-              Lưu
+            <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
+              <Button icon={<PlusOutlined />} type="primary" htmlType="submit">
+                Lưu
+              </Button>
+            </Form.Item>
+          </Form>
+
+          <Divider>Bảng lý trình</Divider>
+          <Table
+            columns={columns}
+            dataSource={route}
+            rowKey="gaDi"
+            pagination={false}
+          />
+
+          <div style={{ textAlign: 'right' }}>
+            <Button
+              type="primary"
+              style={{ marginRight: 12 }}
+              onClick={this.handleClickSubmit}
+            >
+              Xác nhận
             </Button>
-          </Form.Item>
-        </Form>
-
-        <Divider>Bảng lý trình</Divider>
-        <Table
-          columns={columns}
-          dataSource={route}
-          rowKey="gaDi"
-          pagination={false}
-        />
-
-        <div style={{ textAlign: 'right' }}>
-          <Button
-            type="primary"
-            style={{ marginRight: 12 }}
-            onClick={this.handleClickSubmit}
-          >
-            Xác nhận
-          </Button>
-        </div>
+          </div>
+        </Spin>
       </div>
     );
   }
@@ -350,6 +388,9 @@ class EditRoute extends Component {
 const mapStateToProps = (state) => ({
   routes: state.route.routes,
   stations: state.station.stations,
+  isEdited: state.route.isEdited,
+  err: state.error,
+  msg: state.route.msg,
 });
 const mapDispatchToProps = (dispatch, props) => {
   return {

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { actCreateRoute } from '../../../actions/routeAction';
-import { Select, Form, Button, Spin } from 'antd';
+import { Select, Form, Button, Spin, InputNumber } from 'antd';
 import moment from 'moment';
 import { openNotificationWithIcon } from '../../../utils/notification';
 
@@ -17,6 +17,12 @@ const layout = {
 };
 const validateMessages = {
   required: 'Trường này là bắt buộc',
+  types: {
+    number: 'Dữ liệu không hợp lệ',
+  },
+  number: {
+    range: 'Giá tiền phải giữa ${min} và ${max}',
+  },
 };
 class TrainModal extends Component {
   state = {
@@ -24,9 +30,9 @@ class TrainModal extends Component {
   };
   handleSubmit = (value) => {
     const { gadi, gaden, route, tongKM } = this.props;
-    const { mactau } = value.route;
+    const { mactau, gia1Km } = value.route;
 
-    this.props.onCreateRoute({ gadi, gaden, route, mactau, tongKM });
+    this.props.onCreateRoute({ gadi, gaden, route, mactau, tongKM, gia1Km });
 
     this.setState({
       loading: true,
@@ -57,20 +63,23 @@ class TrainModal extends Component {
           >
             <Form.Item
               name={['route', 'mactau']}
-              label="Tàu"
+              label="Mác tàu"
               rules={[
                 {
                   required: true,
                 },
               ]}
             >
-              <Select placeholder="Chọn mác tàu (Nếu có)">
+              <Select
+                style={{ width: 200 }}
+                placeholder="Chọn mác tàu (Nếu có)"
+              >
                 {this.props.trains
                   .filter((f) => {
                     return (
                       f.gahientai === this.props.gadi &&
                       moment(this.props.route[0].thoigianDi).isAfter(
-                        moment(f.ngaytratau).add(1, 'days')
+                        moment(f.ngaytratau).endOf('day')
                       )
                     );
                   })
@@ -82,6 +91,21 @@ class TrainModal extends Component {
                     );
                   })}
               </Select>
+            </Form.Item>
+
+            <Form.Item
+              name={['route', 'gia1Km']}
+              label="Giá tiền"
+              rules={[
+                {
+                  required: true,
+                  type: 'number',
+                  min: 0,
+                  max: 1000000,
+                },
+              ]}
+            >
+              <InputNumber style={{ width: 200 }} placeholder="Giá cho 1 km" />
             </Form.Item>
             <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
               <Button

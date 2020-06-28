@@ -1,0 +1,15 @@
+.container {
+  text-align: center;
+  background-color: #036379;
+  height: 100vh;
+  padding-top: 100px;
+}
+h1 {
+  margin-bottom: 100px;
+}
+.ant-form-item-label > label {
+  color: white !important;
+}
+button {
+  background-color: white;
+}

@@ -31,12 +31,12 @@ class Statistic extends Component {
 
     setTimeout(() => {
       let invoicesFilterDay = [];
-      this.props.invoices.map((invoice) => {});
       this.props.invoices
         .filter(
           (f) =>
-            moment(f.ngaylapHD).isAfter(moment().subtract(3, 'days')) &&
-            moment(f.ngaylapHD).isBefore(moment())
+            moment(f.ngaylapHD).isAfter(moment().subtract(3, 'days'), 'day') &&
+            moment(f.ngaylapHD).isSameOrBefore(moment(), 'day') &&
+            moment(f.ngaylapHD).month() === moment().month()
         )
         .map((invoice) => {
           return invoicesFilterDay.push({
@@ -65,8 +65,12 @@ class Statistic extends Component {
         this.props.invoices
           .filter(
             (f) =>
-              moment(f.ngaylapHD).isAfter(moment().subtract(3, 'days')) &&
-              moment(f.ngaylapHD).isBefore(moment())
+              moment(f.ngaylapHD).isAfter(
+                moment().subtract(3, 'days'),
+                'day'
+              ) &&
+              moment(f.ngaylapHD).isSameOrBefore(moment(), 'day') &&
+              moment(f.ngaylapHD).month() === moment().month()
           )
           .map((invoice) => {
             return invoicesFilterDay.push({
@@ -154,12 +158,16 @@ class Statistic extends Component {
     switch (this.state.filter) {
       case 'day':
         let invoicesFilterDay = [];
+
         this.props.invoices
           .filter(
             (f) =>
               moment(f.ngaylapHD).isAfter(
-                moment().subtract(parseInt(value), 'days')
-              ) && moment(f.ngaylapHD).isBefore(moment())
+                moment().subtract(parseInt(value), 'days'),
+                'day'
+              ) &&
+              moment(f.ngaylapHD).isSameOrBefore(moment(), 'day') &&
+              moment(f.ngaylapHD).month() === moment().month()
           )
           .map((invoice) => {
             return invoicesFilterDay.push({
@@ -170,6 +178,7 @@ class Statistic extends Component {
               tongtienHD: invoice.tongtienHD,
             });
           });
+
         this.setState({ invoices: invoicesFilterDay.reverse() });
         break;
       case 'month':
@@ -182,7 +191,6 @@ class Statistic extends Component {
               moment(f.ngaylapHD).month() + 1 === i &&
               moment(f.ngaylapHD).year() === parseInt(value)
           );
-          console.log(arr);
 
           if (arr.length !== 0) {
             tongtientheothang = arr.reduce((a, b) => a + b.tongtienHD, 0);
@@ -199,9 +207,11 @@ class Statistic extends Component {
         });
 
         break;
+
       case 'year':
         let invoicesFilterYear = [];
         let numberOfYear = 2020 - parseInt(value);
+
         for (let i = 2020; i > numberOfYear; i--) {
           let tongtientheonam = 0;
           const arr = this.props.invoices.filter(

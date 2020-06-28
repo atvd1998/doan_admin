@@ -94,15 +94,14 @@ class InvoiceManage extends Component {
             <Button
               onClick={() => this.handleClickCustomer(record._id)}
               icon={<UserOutlined />}
-              style={{ margin: 10, backgroundColor: '#faad14', color: 'white' }}
+              style={{ margin: 10, backgroundColor: '#a0d911', color: 'white' }}
             >
               Thông tin khách hàng
             </Button>
             <Button
-              type="success"
               onClick={() => this.handleClickInvoiceDetail(record._id)}
               icon={<FileTextOutlined />}
-              style={{ backgroundColor: '#3cba9f', color: 'white' }}
+              type="primary"
             >
               Chi tiết hóa đơn
             </Button>

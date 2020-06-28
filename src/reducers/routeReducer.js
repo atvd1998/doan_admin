@@ -4,6 +4,10 @@ import {
   CREATE_ROUTE_FAIL,
   EDIT_ROUTE_SUCCESS,
   EDIT_ROUTE_FAIL,
+  UPDATE_ROUTE_SUCCESS,
+  UPDATE_ROUTE_FAIL,
+  DELETE_ROUTE_SUCCESS,
+  DELETE_ROUTE_FAIL,
 } from '../actions/types';
 
 const initialState = {
@@ -11,6 +15,8 @@ const initialState = {
   msg: null,
   isEdited: null,
   isCreated: null,
+  isUpdated: null,
+  isDeleted: null,
 };
 
 const schedules = (state = initialState, action) => {
@@ -41,6 +47,28 @@ const schedules = (state = initialState, action) => {
       return {
         ...state,
         isEdited: false,
+      };
+    case UPDATE_ROUTE_SUCCESS:
+      return {
+        ...state,
+        isUpdated: true,
+        msg: action.payload.msg,
+      };
+    case UPDATE_ROUTE_FAIL:
+      return {
+        ...state,
+        isUpdated: false,
+      };
+    case DELETE_ROUTE_SUCCESS:
+      return {
+        ...state,
+        isDeleted: true,
+        msg: action.payload.msg,
+      };
+    case DELETE_ROUTE_FAIL:
+      return {
+        ...state,
+        isDeleted: false,
       };
 
     default:

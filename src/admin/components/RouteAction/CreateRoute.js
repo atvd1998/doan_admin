@@ -1,10 +1,20 @@
 import React, { Component } from 'react';
-import { Form, Button, Select, Divider, Table, DatePicker, Modal } from 'antd';
+import {
+  Form,
+  Button,
+  Select,
+  Divider,
+  Table,
+  DatePicker,
+  Modal,
+  Popover,
+} from 'antd';
 import { connect } from 'react-redux';
 import moment from 'moment';
 import train from '../../../assets/images/train.png';
 import { actCreateRoute } from '../../../actions/routeAction';
-import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { QuestionCircleOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import TrainModal from './TrainModal';
 const { Option } = Select;
 
@@ -238,7 +248,19 @@ class CreateRoute extends Component {
           </div>
         </div>
 
-        <Divider>Thông tin chuyến đi</Divider>
+        <Divider>
+          Thông tin chuyến đi{' '}
+          <Popover
+            content={this.props.stations.map((station, index) => (
+              <div key={index}>
+                {station.tenga} - {station.khoangcach} km
+              </div>
+            ))}
+            title="Thứ tự ga"
+          >
+            <QuestionCircleOutlined />
+          </Popover>
+        </Divider>
         <Form
           ref={this.formRef}
           style={{ width: '30%', margin: 'auto' }}
@@ -357,7 +379,7 @@ class CreateRoute extends Component {
           </Modal>
 
           <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 8 }}>
-            <Button type="primary" htmlType="submit">
+            <Button icon={<PlusOutlined />} type="primary" htmlType="submit">
               Lưu
             </Button>
           </Form.Item>
